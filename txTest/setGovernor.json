@@ -1,0 +1,12 @@
+{
+  "title": "Update Permissionned Governor",
+  "description": "Update permissionned governor",
+  "changes": [
+    {
+      "subspace": "permgov",
+      "key": "Governor",
+      "value": "noria1ywkqtekfm3f75cljwh480uqlmnpxzhynqrhakf"
+    }
+  ],
+  "deposit": "1000000unoria"
+}

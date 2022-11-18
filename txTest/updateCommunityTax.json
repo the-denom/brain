@@ -1,0 +1,12 @@
+{
+  "title": "Distribution Param Change",
+  "description": "Update community tax",
+  "changes": [
+    {
+      "subspace": "distribution",
+      "key": "communitytax",
+      "value": "0.0"
+    }
+  ],
+  "deposit": "1000000unoria"
+}

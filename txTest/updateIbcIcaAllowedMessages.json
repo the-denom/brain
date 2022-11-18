@@ -1,0 +1,12 @@
+{
+  "title": "Change IBC Allowed messaged",
+  "description": "Change IBC Allowed messaged",
+  "changes": [
+    {
+      "subspace": "icahost",
+      "key": "AllowMessages",
+      "value": ["*"]
+    }
+  ],
+  "deposit": "1000000unoria"
+}
