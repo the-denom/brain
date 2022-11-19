@@ -3,7 +3,7 @@
 # Taken from Polkachu
 # Run this to configure your config.toml for state sync and quick catch up to the latest height
 
-SNAP_RPC=""
+SNAP_RPC="https://neuron-rpc.cryptodollar.dev"
 
 LATEST_HEIGHT=$(curl -s $SNAP_RPC/block | jq -r .result.block.header.height); \
 BLOCK_HEIGHT=$((LATEST_HEIGHT - 500)); \
