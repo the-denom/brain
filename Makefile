@@ -81,6 +81,10 @@ ifeq (boltdb,$(findstring boltdb,$(COSMOS_BUILD_OPTIONS)))
   ldflags += -X github.com/cosmos/cosmos-sdk/types.DBBackend=boltdb
 endif
 
+ifeq ($(LINK_STATICALLY),true)
+	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+endif
+
 ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
   ldflags += -w -s
 endif
@@ -104,3 +108,11 @@ clean:
     $(BUILDDIR)/ \
     artifacts/ \
     tmp-swagger-gen/
+
+docker-build:
+	$(DOCKER) build -f ./docker/Dockerfile.build -t brain\:$(VERSION) .; \
+	$(DOCKER) run --rm -v $(CURDIR)\:/code brain\:$(VERSION) make build;
+
+docker-test:
+	$(DOCKER) build -f ./docker/Dockerfile.test -t brain_test\:$(VERSION) .; \
+	$(DOCKER) run brain_test\:$(VERSION);
