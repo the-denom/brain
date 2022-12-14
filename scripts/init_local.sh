@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# This script wipe your config folder (~/.cdnode),
-# creates a new wallet named "me"
-# and prepares everything to be able to start running 
-# a fresh chain from height 1.
+# This script will
+#  * wipe your config folder (~/.brain),
+#  * create a new wallet named "me", and
+#  * prepare everything to be able to start running 
+#    a fresh chain from height 1.
 # 
 # This is not meant to be used when trying to sync to an existing chain,
 # but rather to work in a local development environment.
