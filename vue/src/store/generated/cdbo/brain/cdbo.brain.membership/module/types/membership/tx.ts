@@ -4,18 +4,18 @@ import { Reader, Writer } from "protobufjs/minimal";
 export const protobufPackage = "cdbo.brain.membership";
 
 export interface MsgEnroll {
-  creator: string;
+  member_address: string;
   nickname: string;
 }
 
 export interface MsgEnrollResponse {}
 
-const baseMsgEnroll: object = { creator: "", nickname: "" };
+const baseMsgEnroll: object = { member_address: "", nickname: "" };
 
 export const MsgEnroll = {
   encode(message: MsgEnroll, writer: Writer = Writer.create()): Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.member_address !== "") {
+      writer.uint32(10).string(message.member_address);
     }
     if (message.nickname !== "") {
       writer.uint32(18).string(message.nickname);
@@ -31,7 +31,7 @@ export const MsgEnroll = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
+          message.member_address = reader.string();
           break;
         case 2:
           message.nickname = reader.string();
@@ -46,10 +46,10 @@ export const MsgEnroll = {
 
   fromJSON(object: any): MsgEnroll {
     const message = { ...baseMsgEnroll } as MsgEnroll;
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = String(object.creator);
+    if (object.member_address !== undefined && object.member_address !== null) {
+      message.member_address = String(object.member_address);
     } else {
-      message.creator = "";
+      message.member_address = "";
     }
     if (object.nickname !== undefined && object.nickname !== null) {
       message.nickname = String(object.nickname);
@@ -61,17 +61,18 @@ export const MsgEnroll = {
 
   toJSON(message: MsgEnroll): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
+    message.member_address !== undefined &&
+      (obj.member_address = message.member_address);
     message.nickname !== undefined && (obj.nickname = message.nickname);
     return obj;
   },
 
   fromPartial(object: DeepPartial<MsgEnroll>): MsgEnroll {
     const message = { ...baseMsgEnroll } as MsgEnroll;
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = object.creator;
+    if (object.member_address !== undefined && object.member_address !== null) {
+      message.member_address = object.member_address;
     } else {
-      message.creator = "";
+      message.member_address = "";
     }
     if (object.nickname !== undefined && object.nickname !== null) {
       message.nickname = object.nickname;

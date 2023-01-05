@@ -40,6 +40,8 @@ func MembershipKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 		cdc,
 		storeKey,
 		memStoreKey,
+		// TODO: add a mock account keeper here
+		nil,
 		paramsSubspace,
 	)
 

@@ -9,10 +9,10 @@ const TypeMsgEnroll = "enroll"
 
 var _ sdk.Msg = &MsgEnroll{}
 
-func NewMsgEnroll(creator string, nickname string) *MsgEnroll {
+func NewMsgEnroll(memberAddress string, nickname string) *MsgEnroll {
 	return &MsgEnroll{
-		Creator:  creator,
-		Nickname: nickname,
+		MemberAddress: memberAddress,
+		Nickname:      nickname,
 	}
 }
 
@@ -25,7 +25,7 @@ func (msg *MsgEnroll) Type() string {
 }
 
 func (msg *MsgEnroll) GetSigners() []sdk.AccAddress {
-	creator, err := sdk.AccAddressFromBech32(msg.Creator)
+	creator, err := sdk.AccAddressFromBech32(msg.MemberAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -38,9 +38,13 @@ func (msg *MsgEnroll) GetSignBytes() []byte {
 }
 
 func (msg *MsgEnroll) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+	// Member address must be valid
+	if _, err := sdk.AccAddressFromBech32(msg.MemberAddress); err != nil {
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid member address: %s", err)
+	}
+	// Nickname is optional but can only be a max of 30 characters long
+	if len(msg.Nickname) > NicknameMaxLength {
+		return sdkerrors.ErrInvalidRequest.Wrapf("member nickname longer than the %d character limit", NicknameMaxLength)
 	}
 	return nil
 }

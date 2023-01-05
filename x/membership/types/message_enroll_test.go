@@ -17,13 +17,13 @@ func TestMsgEnroll_ValidateBasic(t *testing.T) {
 		{
 			name: "invalid address",
 			msg: MsgEnroll{
-				Creator: "invalid_address",
+				MemberAddress: "invalid_address",
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgEnroll{
-				Creator: sample.AccAddress(),
+				MemberAddress: sample.AccAddress(),
 			},
 		},
 	}

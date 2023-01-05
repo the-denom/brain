@@ -19,7 +19,7 @@ func SimulateMsgEnroll(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgEnroll{
-			Creator: simAccount.Address.String(),
+			MemberAddress: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the Enroll simulation
