@@ -34130,6 +34130,8 @@ paths:
       tags:
         - Query
 definitions:
+  cdbo.brain.membership.MsgEnrollResponse:
+    type: object
   cdbo.brain.membership.Params:
     type: object
     description: Params defines the parameters for the module.

@@ -9,6 +9,8 @@
  * ---------------------------------------------------------------
  */
 
+export type MembershipMsgEnrollResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */
