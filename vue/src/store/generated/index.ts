@@ -1,6 +1,7 @@
 // THIS FILE IS GENERATED AUTOMATICALLY. DO NOT MODIFY.
 
 import CosmWasmWasmdCosmwasmWasmV1 from './CosmWasm/wasmd/cosmwasm.wasm.v1'
+import CdboBrainCdboBrainMembership from './cdbo/brain/cdbo.brain.membership'
 import CosmosCosmosSdkCosmosAuthV1Beta1 from './cosmos/cosmos-sdk/cosmos.auth.v1beta1'
 import CosmosCosmosSdkCosmosAuthzV1Beta1 from './cosmos/cosmos-sdk/cosmos.authz.v1beta1'
 import CosmosCosmosSdkCosmosBankV1Beta1 from './cosmos/cosmos-sdk/cosmos.bank.v1beta1'
@@ -28,6 +29,7 @@ import IbcGoV3IbcCoreConnectionV1 from './ibc-go/v3/ibc.core.connection.v1'
 
 export default { 
   CosmWasmWasmdCosmwasmWasmV1: load(CosmWasmWasmdCosmwasmWasmV1, 'cosmwasm.wasm.v1'),
+  CdboBrainCdboBrainMembership: load(CdboBrainCdboBrainMembership, 'cdbo.brain.membership'),
   CosmosCosmosSdkCosmosAuthV1Beta1: load(CosmosCosmosSdkCosmosAuthV1Beta1, 'cosmos.auth.v1beta1'),
   CosmosCosmosSdkCosmosAuthzV1Beta1: load(CosmosCosmosSdkCosmosAuthzV1Beta1, 'cosmos.authz.v1beta1'),
   CosmosCosmosSdkCosmosBankV1Beta1: load(CosmosCosmosSdkCosmosBankV1Beta1, 'cosmos.bank.v1beta1'),

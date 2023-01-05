@@ -1,0 +1,12 @@
+syntax = "proto3";
+package cdbo.brain.membership;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/cdbo/brain/x/membership/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+  
+}
