@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	wasmappparams "github.com/CosmWasm/wasmd/app/params"
+	"github.com/CosmWasm/wasmd/x/wasm"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -54,10 +56,23 @@ func DefaultConfig() network.Config {
 		InterfaceRegistry: encoding.InterfaceRegistry,
 		AccountRetriever:  authtypes.AccountRetriever{},
 		AppConstructor: func(val network.Validator) servertypes.Application {
-			return app.New(
-				val.Ctx.Logger, tmdb.NewMemDB(), nil, true, map[int64]bool{}, val.Ctx.Config.RootDir, 0,
-				encoding,
+			return app.NewWasmApp(
+				val.Ctx.Logger,
+				tmdb.NewMemDB(),
+				nil,
+				true,
+				map[int64]bool{},
+				val.Ctx.Config.RootDir,
+				0,
+				wasmappparams.EncodingConfig{
+					InterfaceRegistry: encoding.InterfaceRegistry,
+					Marshaler:         encoding.Marshaler,
+					TxConfig:          encoding.TxConfig,
+					Amino:             encoding.Amino,
+				},
+				app.GetEnabledProposals(),
 				simapp.EmptyAppOptions{},
+				[]wasm.Option{},
 				baseapp.SetPruning(storetypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
 				baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
 			)
