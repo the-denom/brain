@@ -1,0 +1,13 @@
+syntax = "proto3";
+package cdbo.brain.membership;
+
+option go_package = "github.com/cdbo/brain/x/membership/types";
+
+// EventMemberEnrolled is an event emitted when a new member joins The Denom
+message EventMemberEnrolled { string member_address = 1; }
+
+// EventMemberStatusChanged is an event emitted when a member's citizenship status changes 
+message EventMemberStatusChanged {
+  string member_address = 1;
+  MembershipStatus status = 2;
+}

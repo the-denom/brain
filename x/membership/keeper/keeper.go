@@ -11,8 +11,12 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
+// MembershipKeeperI is the interface contract that x/membership's keeper implements
+type MembershipKeeperI interface {
+}
+
 type (
-	Keeper struct {
+	MembershipKeeper struct {
 		cdc      codec.BinaryCodec
 		storeKey sdk.StoreKey
 		memKey   sdk.StoreKey
@@ -23,6 +27,8 @@ type (
 	}
 )
 
+var _ MembershipKeeperI = &MembershipKeeper{}
+
 func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey,
@@ -32,13 +38,13 @@ func NewKeeper(
 
 	ps paramtypes.Subspace,
 
-) *Keeper {
+) *MembershipKeeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
 		ps = ps.WithKeyTable(types.ParamKeyTable())
 	}
 
-	return &Keeper{
+	return &MembershipKeeper{
 
 		cdc:        cdc,
 		storeKey:   storeKey,
@@ -47,6 +53,6 @@ func NewKeeper(
 	}
 }
 
-func (k Keeper) Logger(ctx sdk.Context) log.Logger {
+func (k MembershipKeeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }

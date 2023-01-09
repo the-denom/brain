@@ -278,7 +278,7 @@ type WasmApp struct {
 	scopedTransferKeeper      capabilitykeeper.ScopedKeeper
 	scopedWasmKeeper          capabilitykeeper.ScopedKeeper
 
-	MembershipKeeper membershipmodulekeeper.Keeper
+	MembershipKeeper membershipmodulekeeper.MembershipKeeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// the module manager
@@ -587,6 +587,7 @@ func NewWasmApp(
 		appCodec,
 		keys[membershipmoduletypes.StoreKey],
 		keys[membershipmoduletypes.MemStoreKey],
+		app.accountKeeper,
 		app.getSubspace(membershipmoduletypes.ModuleName),
 	)
 	membershipModule := membershipmodule.NewAppModule(

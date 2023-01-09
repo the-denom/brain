@@ -10,24 +10,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	FlagNickname = "nickname"
+)
+
 var _ = strconv.Itoa(0)
 
 func CmdEnroll() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "enroll [nickname]",
+		Use:   "enroll",
 		Short: "Enroll the caller as a new member of The Denom",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			argNickname := args[0]
-
 			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			flagNickname, err := cmd.Flags().GetString(FlagNickname)
 			if err != nil {
 				return err
 			}
 
 			msg := types.NewMsgEnroll(
 				clientCtx.GetFromAddress().String(),
-				argNickname,
+				flagNickname,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -35,6 +42,8 @@ func CmdEnroll() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
+
+	cmd.Flags().String(FlagNickname, "", "The member's nickname")
 
 	flags.AddTxFlagsToCmd(cmd)
 

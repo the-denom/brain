@@ -1,10 +1,12 @@
 import { txClient, queryClient, MissingWalletError , registry} from './module'
 
+import { EventMemberEnrolled } from "./module/types/membership/events"
+import { EventMemberStatusChanged } from "./module/types/membership/events"
 import { Member } from "./module/types/membership/member"
 import { Params } from "./module/types/membership/params"
 
 
-export { Member, Params };
+export { EventMemberEnrolled, EventMemberStatusChanged, Member, Params };
 
 async function initTxClient(vuexGetters) {
 	return await txClient(vuexGetters['common/wallet/signer'], {
@@ -45,6 +47,8 @@ const getDefaultState = () => {
 				Params: {},
 				
 				_Structure: {
+						EventMemberEnrolled: getStructure(EventMemberEnrolled.fromPartial({})),
+						EventMemberStatusChanged: getStructure(EventMemberStatusChanged.fromPartial({})),
 						Member: getStructure(Member.fromPartial({})),
 						Params: getStructure(Params.fromPartial({})),
 						
