@@ -14,6 +14,40 @@
  */
 export type BrainmembershipParams = object;
 
+export interface MembershipMember {
+  /**
+   * BaseAccount defines a base account type. It contains all the necessary fields
+   * for basic account functionality. Any custom account type should extend this
+   * type for additional functionality (e.g. vesting).
+   */
+  base_account?: V1Beta1BaseAccount;
+
+  /**
+   * - MEMBERSHIP_STATUS_UNDEFINED: MEMBERSHIP_STATUS_UNDEFINED defines a no-op status
+   *  - MEMBERSHIP_STATUS_ELECTORATE: MEMBERSHIP_STATUS_ELECTORATE defines this member as being an active citizen
+   *  - MEMBERSHIP_STATUS_INACTIVE: MEMBERSHIP_STATUS_INACTIVE defines this member as being an inactive citizen
+   *  - MEMBERSHIP_STATUS_RECALLED: MEMBERSHIP_STATUS_RECALLED defines this member as being recalled
+   *  - MEMBERSHIP_STATUS_EXPULSED: MEMBERSHIP_STATUS_EXPULSED defines this member as being expulsed
+   */
+  status?: MembershipMembershipStatus;
+  nickname?: string;
+}
+
+/**
+* - MEMBERSHIP_STATUS_UNDEFINED: MEMBERSHIP_STATUS_UNDEFINED defines a no-op status
+ - MEMBERSHIP_STATUS_ELECTORATE: MEMBERSHIP_STATUS_ELECTORATE defines this member as being an active citizen
+ - MEMBERSHIP_STATUS_INACTIVE: MEMBERSHIP_STATUS_INACTIVE defines this member as being an inactive citizen
+ - MEMBERSHIP_STATUS_RECALLED: MEMBERSHIP_STATUS_RECALLED defines this member as being recalled
+ - MEMBERSHIP_STATUS_EXPULSED: MEMBERSHIP_STATUS_EXPULSED defines this member as being expulsed
+*/
+export enum MembershipMembershipStatus {
+  MEMBERSHIP_STATUS_UNDEFINED = "MEMBERSHIP_STATUS_UNDEFINED",
+  MEMBERSHIP_STATUS_ELECTORATE = "MEMBERSHIP_STATUS_ELECTORATE",
+  MEMBERSHIP_STATUS_INACTIVE = "MEMBERSHIP_STATUS_INACTIVE",
+  MEMBERSHIP_STATUS_RECALLED = "MEMBERSHIP_STATUS_RECALLED",
+  MEMBERSHIP_STATUS_EXPULSED = "MEMBERSHIP_STATUS_EXPULSED",
+}
+
 export type MembershipMsgEnrollResponse = object;
 
 /**
@@ -22,6 +56,10 @@ export type MembershipMsgEnrollResponse = object;
 export interface MembershipQueryParamsResponse {
   /** params holds all the parameters of this module. */
   params?: BrainmembershipParams;
+}
+
+export interface MembershipQueryStatusResponse {
+  member?: MembershipMember;
 }
 
 /**
@@ -146,6 +184,107 @@ export interface RpcStatus {
   code?: number;
   message?: string;
   details?: ProtobufAny[];
+}
+
+/**
+* BaseAccount defines a base account type. It contains all the necessary fields
+for basic account functionality. Any custom account type should extend this
+type for additional functionality (e.g. vesting).
+*/
+export interface V1Beta1BaseAccount {
+  address?: string;
+
+  /**
+   * `Any` contains an arbitrary serialized protocol buffer message along with a
+   * URL that describes the type of the serialized message.
+   *
+   * Protobuf library provides support to pack/unpack Any values in the form
+   * of utility functions or additional generated methods of the Any type.
+   *
+   * Example 1: Pack and unpack a message in C++.
+   *
+   *     Foo foo = ...;
+   *     Any any;
+   *     any.PackFrom(foo);
+   *     ...
+   *     if (any.UnpackTo(&foo)) {
+   *       ...
+   *     }
+   *
+   * Example 2: Pack and unpack a message in Java.
+   *
+   *     Foo foo = ...;
+   *     Any any = Any.pack(foo);
+   *     ...
+   *     if (any.is(Foo.class)) {
+   *       foo = any.unpack(Foo.class);
+   *     }
+   *
+   *  Example 3: Pack and unpack a message in Python.
+   *
+   *     foo = Foo(...)
+   *     any = Any()
+   *     any.Pack(foo)
+   *     ...
+   *     if any.Is(Foo.DESCRIPTOR):
+   *       any.Unpack(foo)
+   *       ...
+   *
+   *  Example 4: Pack and unpack a message in Go
+   *
+   *      foo := &pb.Foo{...}
+   *      any, err := anypb.New(foo)
+   *      if err != nil {
+   *        ...
+   *      }
+   *      ...
+   *      foo := &pb.Foo{}
+   *      if err := any.UnmarshalTo(foo); err != nil {
+   *        ...
+   *      }
+   *
+   * The pack methods provided by protobuf library will by default use
+   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
+   * methods only use the fully qualified type name after the last '/'
+   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
+   * name "y.z".
+   *
+   *
+   * JSON
+   * ====
+   * The JSON representation of an `Any` value uses the regular
+   * representation of the deserialized, embedded message, with an
+   * additional field `@type` which contains the type URL. Example:
+   *
+   *     package google.profile;
+   *     message Person {
+   *       string first_name = 1;
+   *       string last_name = 2;
+   *     }
+   *
+   *     {
+   *       "@type": "type.googleapis.com/google.profile.Person",
+   *       "firstName": <string>,
+   *       "lastName": <string>
+   *     }
+   *
+   * If the embedded message type is well-known and has a custom JSON
+   * representation, that representation will be embedded adding a field
+   * `value` which holds the custom JSON in addition to the `@type`
+   * field. Example (for message [google.protobuf.Duration][]):
+   *
+   *     {
+   *       "@type": "type.googleapis.com/google.protobuf.Duration",
+   *       "value": "1.212s"
+   *     }
+   */
+  pub_key?: ProtobufAny;
+
+  /** @format uint64 */
+  account_number?: string;
+
+  /** @format uint64 */
+  sequence?: string;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -355,6 +494,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
   queryParams = (params: RequestParams = {}) =>
     this.request<MembershipQueryParamsResponse, RpcStatus>({
       path: `/cdbo/brain/membership/params`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryStatus
+   * @summary Queries a list of Status items.
+   * @request GET:/cdbo/brain/membership/status/{address}
+   */
+  queryStatus = (address: string, params: RequestParams = {}) =>
+    this.request<MembershipQueryStatusResponse, RpcStatus>({
+      path: `/cdbo/brain/membership/status/${address}`,
       method: "GET",
       format: "json",
       ...params,

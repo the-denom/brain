@@ -5,6 +5,7 @@ import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "membership/params.proto";
+import "membership/member.proto";
 // this line is used by starport scaffolding # 1
 
 option go_package = "github.com/cdbo/brain/x/membership/types";
@@ -15,6 +16,11 @@ service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/cdbo/brain/membership/params";
   }
+  // Queries a list of Status items.
+  rpc Status(QueryStatusRequest) returns (QueryStatusResponse) {
+    option (google.api.http).get = "/cdbo/brain/membership/status/{address}";
+  }
+
   // this line is used by starport scaffolding # 2
 }
 
@@ -24,7 +30,11 @@ message QueryParamsRequest {}
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
   // params holds all the parameters of this module.
-  Params params = 1 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
 }
+
+message QueryStatusRequest { string address = 1; }
+
+message QueryStatusResponse { Member member = 1; }
 
 // this line is used by starport scaffolding # 3

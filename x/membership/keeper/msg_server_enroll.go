@@ -29,18 +29,23 @@ func (k msgServer) Enroll(goCtx context.Context, msg *types.MsgEnroll) (*types.M
 		return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "account %s already exists", msg.MemberAddress)
 	}
 
-	// Create a base account
+	// Create a base baseAccount
 	baseAccount := ak.NewAccountWithAddress(ctx, enrollee)
 	// Ensure account type is correct
 	if _, ok := baseAccount.(*authtypes.BaseAccount); !ok {
 		return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid account type; expected: BaseAccount, got: %T", baseAccount)
 	}
-	// Create a member account
-	var memberAccount authtypes.AccountI
-	memberAccount = types.NewMemberAccountWithDefaultMemberStatus(baseAccount.(*authtypes.BaseAccount), msg.Nickname)
+	// Save the base account
+	ak.SetAccount(ctx, baseAccount)
 
-	// Save it to the store
-	ak.SetAccount(ctx, memberAccount)
+	// Create a member account
+	memberAccount := types.NewMemberAccountWithDefaultMemberStatus(
+		baseAccount.(*authtypes.BaseAccount),
+		msg.Nickname,
+	)
+	// Save member account to the store
+	// TODO: remove - checkpoint for demo
+	_ = memberAccount
 
 	// Publish events
 	err = ctx.EventManager().EmitTypedEvents(

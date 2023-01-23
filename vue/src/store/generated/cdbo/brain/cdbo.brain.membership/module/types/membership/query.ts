@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { Reader, Writer } from "protobufjs/minimal";
 import { Params } from "../membership/params";
+import { Member } from "../membership/member";
 
 export const protobufPackage = "cdbo.brain.membership";
 
@@ -11,6 +12,14 @@ export interface QueryParamsRequest {}
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
   params: Params | undefined;
+}
+
+export interface QueryStatusRequest {
+  address: string;
+}
+
+export interface QueryStatusResponse {
+  member: Member | undefined;
 }
 
 const baseQueryParamsRequest: object = {};
@@ -110,10 +119,129 @@ export const QueryParamsResponse = {
   },
 };
 
+const baseQueryStatusRequest: object = { address: "" };
+
+export const QueryStatusRequest = {
+  encode(
+    message: QueryStatusRequest,
+    writer: Writer = Writer.create()
+  ): Writer {
+    if (message.address !== "") {
+      writer.uint32(10).string(message.address);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): QueryStatusRequest {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseQueryStatusRequest } as QueryStatusRequest;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.address = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryStatusRequest {
+    const message = { ...baseQueryStatusRequest } as QueryStatusRequest;
+    if (object.address !== undefined && object.address !== null) {
+      message.address = String(object.address);
+    } else {
+      message.address = "";
+    }
+    return message;
+  },
+
+  toJSON(message: QueryStatusRequest): unknown {
+    const obj: any = {};
+    message.address !== undefined && (obj.address = message.address);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<QueryStatusRequest>): QueryStatusRequest {
+    const message = { ...baseQueryStatusRequest } as QueryStatusRequest;
+    if (object.address !== undefined && object.address !== null) {
+      message.address = object.address;
+    } else {
+      message.address = "";
+    }
+    return message;
+  },
+};
+
+const baseQueryStatusResponse: object = {};
+
+export const QueryStatusResponse = {
+  encode(
+    message: QueryStatusResponse,
+    writer: Writer = Writer.create()
+  ): Writer {
+    if (message.member !== undefined) {
+      Member.encode(message.member, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): QueryStatusResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseQueryStatusResponse } as QueryStatusResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.member = Member.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryStatusResponse {
+    const message = { ...baseQueryStatusResponse } as QueryStatusResponse;
+    if (object.member !== undefined && object.member !== null) {
+      message.member = Member.fromJSON(object.member);
+    } else {
+      message.member = undefined;
+    }
+    return message;
+  },
+
+  toJSON(message: QueryStatusResponse): unknown {
+    const obj: any = {};
+    message.member !== undefined &&
+      (obj.member = message.member ? Member.toJSON(message.member) : undefined);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<QueryStatusResponse>): QueryStatusResponse {
+    const message = { ...baseQueryStatusResponse } as QueryStatusResponse;
+    if (object.member !== undefined && object.member !== null) {
+      message.member = Member.fromPartial(object.member);
+    } else {
+      message.member = undefined;
+    }
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
+  /** Queries a list of Status items. */
+  Status(request: QueryStatusRequest): Promise<QueryStatusResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -129,6 +257,16 @@ export class QueryClientImpl implements Query {
       data
     );
     return promise.then((data) => QueryParamsResponse.decode(new Reader(data)));
+  }
+
+  Status(request: QueryStatusRequest): Promise<QueryStatusResponse> {
+    const data = QueryStatusRequest.encode(request).finish();
+    const promise = this.rpc.request(
+      "cdbo.brain.membership.Query",
+      "Status",
+      data
+    );
+    return promise.then((data) => QueryStatusResponse.decode(new Reader(data)));
   }
 }
 
