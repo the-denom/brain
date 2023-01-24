@@ -24,28 +24,31 @@ func (k msgServer) Enroll(goCtx context.Context, msg *types.MsgEnroll) (*types.M
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "nickname too long")
 	}
 
-	// Must not be a member already
-	if ak.HasAccount(ctx, enrollee) {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "account %s already exists", msg.MemberAddress)
+	// Must not already have a member account
+	if k.IsMember(ctx, enrollee) {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "account has already been enrolled")
 	}
 
-	// Create a base baseAccount
-	baseAccount := ak.NewAccountWithAddress(ctx, enrollee)
-	// Ensure account type is correct
-	if _, ok := baseAccount.(*authtypes.BaseAccount); !ok {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid account type; expected: BaseAccount, got: %T", baseAccount)
+	// Get or create a base account
+	var baseAccount = ak.GetAccount(ctx, enrollee)
+	if baseAccount == nil {
+		// Create a base baseAccount
+		baseAccount = ak.NewAccountWithAddress(ctx, enrollee)
+		// Ensure account type is correct
+		if _, ok := baseAccount.(*authtypes.BaseAccount); !ok {
+			return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid account type; expected: BaseAccount, got: %T", baseAccount)
+		}
+		// Save the base account
+		ak.SetAccount(ctx, baseAccount)
 	}
-	// Save the base account
-	ak.SetAccount(ctx, baseAccount)
 
 	// Create a member account
 	memberAccount := types.NewMemberAccountWithDefaultMemberStatus(
 		baseAccount.(*authtypes.BaseAccount),
 		msg.Nickname,
 	)
-	// Save member account to the store
-	// TODO: remove - checkpoint for demo
-	_ = memberAccount
+	// Save it to the store
+	k.SetMember(ctx, enrollee, *memberAccount)
 
 	// Publish events
 	err = ctx.EventManager().EmitTypedEvents(
