@@ -16,7 +16,6 @@ func (k Keeper) Status(goCtx context.Context, req *types.QueryStatusRequest) (*t
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	ak := k.accountKeeper
 
 	// Must have a valid address
 	memberAddress, err := sdk.AccAddressFromBech32(req.Address)
@@ -24,15 +23,14 @@ func (k Keeper) Status(goCtx context.Context, req *types.QueryStatusRequest) (*t
 		return nil, err
 	}
 
-	// Must have an account
-	baseAccount := ak.GetAccount(ctx, memberAddress)
-	if baseAccount == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "account does not exist")
+	// Get the member's account
+	member, found := k.GetMember(ctx, memberAddress)
+	if !found {
+		// Member does not exist
+		return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "member not found")
 	}
 
-	member := baseAccount.(*types.Member)
-
 	return &types.QueryStatusResponse{
-		Member: member,
+		Member: &member,
 	}, nil
 }

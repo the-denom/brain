@@ -6,6 +6,21 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+func (k Keeper) GetMember(ctx sdk.Context, address sdk.AccAddress) (member types.Member, found bool) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.MemberKey))
+	key := types.MakeMemberAddressKey(address)
+
+	k.Logger(ctx).Debug("GetMember", "address", address)
+
+	var b []byte
+	if b = store.Get(key); b == nil {
+		return member, false
+	}
+
+	k.cdc.Unmarshal(b, &member)
+	return member, true
+}
+
 func (k Keeper) SetMember(ctx sdk.Context, address sdk.AccAddress, newMember types.Member) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.MemberKey))
 	memberCount := k.GetMemberCount(ctx)
