@@ -50,6 +50,8 @@ export enum MembershipMembershipStatus {
 
 export type MembershipMsgEnrollResponse = object;
 
+export type MembershipMsgUpdateStatusResponse = object;
+
 /**
  * QueryParamsResponse is response type for the Query/Params RPC method.
  */

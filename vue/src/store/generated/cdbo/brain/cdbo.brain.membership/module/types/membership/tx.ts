@@ -10,6 +10,14 @@ export interface MsgEnroll {
 
 export interface MsgEnrollResponse {}
 
+export interface MsgUpdateStatus {
+  creator: string;
+  address: string;
+  status: string;
+}
+
+export interface MsgUpdateStatusResponse {}
+
 const baseMsgEnroll: object = { member_address: "", nickname: "" };
 
 export const MsgEnroll = {
@@ -121,10 +129,146 @@ export const MsgEnrollResponse = {
   },
 };
 
+const baseMsgUpdateStatus: object = { creator: "", address: "", status: "" };
+
+export const MsgUpdateStatus = {
+  encode(message: MsgUpdateStatus, writer: Writer = Writer.create()): Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.address !== "") {
+      writer.uint32(18).string(message.address);
+    }
+    if (message.status !== "") {
+      writer.uint32(26).string(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgUpdateStatus {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseMsgUpdateStatus } as MsgUpdateStatus;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.address = reader.string();
+          break;
+        case 3:
+          message.status = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgUpdateStatus {
+    const message = { ...baseMsgUpdateStatus } as MsgUpdateStatus;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = String(object.creator);
+    } else {
+      message.creator = "";
+    }
+    if (object.address !== undefined && object.address !== null) {
+      message.address = String(object.address);
+    } else {
+      message.address = "";
+    }
+    if (object.status !== undefined && object.status !== null) {
+      message.status = String(object.status);
+    } else {
+      message.status = "";
+    }
+    return message;
+  },
+
+  toJSON(message: MsgUpdateStatus): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.address !== undefined && (obj.address = message.address);
+    message.status !== undefined && (obj.status = message.status);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<MsgUpdateStatus>): MsgUpdateStatus {
+    const message = { ...baseMsgUpdateStatus } as MsgUpdateStatus;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = object.creator;
+    } else {
+      message.creator = "";
+    }
+    if (object.address !== undefined && object.address !== null) {
+      message.address = object.address;
+    } else {
+      message.address = "";
+    }
+    if (object.status !== undefined && object.status !== null) {
+      message.status = object.status;
+    } else {
+      message.status = "";
+    }
+    return message;
+  },
+};
+
+const baseMsgUpdateStatusResponse: object = {};
+
+export const MsgUpdateStatusResponse = {
+  encode(_: MsgUpdateStatusResponse, writer: Writer = Writer.create()): Writer {
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgUpdateStatusResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = {
+      ...baseMsgUpdateStatusResponse,
+    } as MsgUpdateStatusResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgUpdateStatusResponse {
+    const message = {
+      ...baseMsgUpdateStatusResponse,
+    } as MsgUpdateStatusResponse;
+    return message;
+  },
+
+  toJSON(_: MsgUpdateStatusResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial(
+    _: DeepPartial<MsgUpdateStatusResponse>
+  ): MsgUpdateStatusResponse {
+    const message = {
+      ...baseMsgUpdateStatusResponse,
+    } as MsgUpdateStatusResponse;
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
-  /** this line is used by starport scaffolding # proto/tx/rpc */
   Enroll(request: MsgEnroll): Promise<MsgEnrollResponse>;
+  /** this line is used by starport scaffolding # proto/tx/rpc */
+  UpdateStatus(request: MsgUpdateStatus): Promise<MsgUpdateStatusResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -140,6 +284,18 @@ export class MsgClientImpl implements Msg {
       data
     );
     return promise.then((data) => MsgEnrollResponse.decode(new Reader(data)));
+  }
+
+  UpdateStatus(request: MsgUpdateStatus): Promise<MsgUpdateStatusResponse> {
+    const data = MsgUpdateStatus.encode(request).finish();
+    const promise = this.rpc.request(
+      "cdbo.brain.membership.Msg",
+      "UpdateStatus",
+      data
+    );
+    return promise.then((data) =>
+      MsgUpdateStatusResponse.decode(new Reader(data))
+    );
   }
 }
 
