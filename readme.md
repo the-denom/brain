@@ -139,3 +139,8 @@ braind tx staking create-validator \\
 ```
 
 - [CosmosHub example](https://hub.cosmos.network/main/validators/validator-setup.html#create-your-validator)
+
+
+# Contributions
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information
