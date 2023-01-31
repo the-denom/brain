@@ -115,6 +115,10 @@ import (
 
 	// unnamed import of statik for swagger UI support
 	_ "github.com/cdbo/brain/statik"
+	membershipmodule "github.com/cdbo/brain/x/membership"
+	membershipmodulekeeper "github.com/cdbo/brain/x/membership/keeper"
+	membershipmoduletypes "github.com/cdbo/brain/x/membership/types"
+	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
 const appName = "Brain"
@@ -207,19 +211,22 @@ var (
 		wasm.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		intertx.AppModuleBasic{},
+		membershipmodule.AppModuleBasic{},
+		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
 	// module account permissions
 	maccPerms = map[string][]string{
-		authtypes.FeeCollectorName:       nil,
-		distrtypes.ModuleName:            nil,
-		minttypes.ModuleName:             {authtypes.Minter},
-		stakingtypes.BondedPoolName:      {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName:   {authtypes.Burner, authtypes.Staking},
-		govtypes.ModuleName:              {authtypes.Burner},
-		ibctransfertypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
-		icatypes.ModuleName:              nil,
-		wasm.ModuleName:                  {authtypes.Burner},
+		authtypes.FeeCollectorName:     nil,
+		distrtypes.ModuleName:          nil,
+		minttypes.ModuleName:           {authtypes.Minter},
+		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+		govtypes.ModuleName:            {authtypes.Burner},
+		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		icatypes.ModuleName:            nil,
+		wasm.ModuleName:                {authtypes.Burner},
+		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
 
@@ -271,6 +278,9 @@ type WasmApp struct {
 	scopedTransferKeeper      capabilitykeeper.ScopedKeeper
 	scopedWasmKeeper          capabilitykeeper.ScopedKeeper
 
+	MembershipKeeper membershipmodulekeeper.Keeper
+	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
+
 	// the module manager
 	mm *module.Manager
 
@@ -318,6 +328,8 @@ func NewWasmApp(
 		paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, wasm.StoreKey, icahosttypes.StoreKey, icacontrollertypes.StoreKey, intertxtypes.StoreKey,
+		membershipmoduletypes.StoreKey,
+		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -355,6 +367,8 @@ func NewWasmApp(
 	scopedInterTxKeeper := app.capabilityKeeper.ScopeToModule(intertxtypes.ModuleName)
 	scopedTransferKeeper := app.capabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedWasmKeeper := app.capabilityKeeper.ScopeToModule(wasm.ModuleName)
+	// this line is used by starport scaffolding # stargate/app/scopedKeeper
+
 	app.capabilityKeeper.Seal()
 
 	// add keepers
@@ -556,6 +570,7 @@ func NewWasmApp(
 		AddRoute(icacontrollertypes.SubModuleName, icaControllerIBCModule).
 		AddRoute(icahosttypes.SubModuleName, icaHostIBCModule).
 		AddRoute(intertxtypes.ModuleName, icaControllerIBCModule)
+	// this line is used by starport scaffolding # ibc/app/router
 	app.ibcKeeper.SetRouter(ibcRouter)
 
 	app.govKeeper = govkeeper.NewKeeper(
@@ -567,6 +582,21 @@ func NewWasmApp(
 		&stakingKeeper,
 		govRouter,
 	)
+
+	app.MembershipKeeper = *membershipmodulekeeper.NewKeeper(
+		appCodec,
+		keys[membershipmoduletypes.StoreKey],
+		keys[membershipmoduletypes.MemStoreKey],
+		app.accountKeeper,
+		app.getSubspace(membershipmoduletypes.ModuleName),
+	)
+	membershipModule := membershipmodule.NewAppModule(
+		appCodec,
+		app.MembershipKeeper,
+	)
+
+	// this line is used by starport scaffolding # stargate/app/keeperDefinition
+
 	/****  Module Options ****/
 
 	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
@@ -601,6 +631,8 @@ func NewWasmApp(
 		transferModule,
 		icaModule,
 		interTxModule,
+		membershipModule,
+		// this line is used by starport scaffolding # stargate/app/appModule
 		crisis.NewAppModule(&app.crisisKeeper, skipGenesisInvariants), // always be last to make sure that it checks for all invariants and not only part of them
 	)
 
@@ -631,6 +663,8 @@ func NewWasmApp(
 		icatypes.ModuleName,
 		intertxtypes.ModuleName,
 		wasm.ModuleName,
+		membershipmoduletypes.ModuleName,
+		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -656,6 +690,8 @@ func NewWasmApp(
 		icatypes.ModuleName,
 		intertxtypes.ModuleName,
 		wasm.ModuleName,
+		membershipmoduletypes.ModuleName,
+		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -689,6 +725,8 @@ func NewWasmApp(
 		intertxtypes.ModuleName,
 		// wasm after ibc transfer
 		wasm.ModuleName,
+		membershipmoduletypes.ModuleName,
+		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
 	// Uncomment if you want to set a custom migration order here.
@@ -720,6 +758,8 @@ func NewWasmApp(
 		wasm.NewAppModule(appCodec, &app.wasmKeeper, app.stakingKeeper, app.accountKeeper, app.bankKeeper),
 		ibc.NewAppModule(app.ibcKeeper),
 		transferModule,
+		membershipModule,
+		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
 	app.sm.RegisterStoreDecoders()
@@ -784,6 +824,8 @@ func NewWasmApp(
 
 	// register upgrade
 	app.RegisterUpgradeHandlers(app.configurator)
+
+	// this line is used by starport scaffolding # stargate/app/beforeInitReturn
 
 	return app
 }
@@ -930,6 +972,8 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(wasm.ModuleName)
+	paramsKeeper.Subspace(membershipmoduletypes.ModuleName)
+	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
 }

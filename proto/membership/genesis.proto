@@ -1,0 +1,14 @@
+syntax = "proto3";
+package cdbo.brain.membership;
+
+import "gogoproto/gogo.proto";
+import "membership/params.proto";
+// this line is used by starport scaffolding # genesis/proto/import
+
+option go_package = "github.com/cdbo/brain/x/membership/types";
+
+// GenesisState defines the membership module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+  // this line is used by starport scaffolding # genesis/proto/state
+}

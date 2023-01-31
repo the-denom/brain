@@ -109,6 +109,8 @@ clean:
     artifacts/ \
     tmp-swagger-gen/
 
+rebuild: clean build
+
 docker-build:
 	$(DOCKER) build -f ./docker/Dockerfile.build -t brain\:$(VERSION) .; \
 	$(DOCKER) run --rm -v $(CURDIR)\:/code brain\:$(VERSION) make build;
