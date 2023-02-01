@@ -8,5 +8,7 @@ import (
 
 // x/membership module sentinel errors
 var (
-	ErrSample = sdkerrors.Register(ModuleName, 1100, "sample error")
+	ErrInvalidMembershipStatus          = sdkerrors.Register(ModuleName, 2, "invalid membership status")
+	ErrMemberNotFound                   = sdkerrors.Register(ModuleName, 3, "member not found")
+	ErrMembershipStatusChangeNotAllowed = sdkerrors.Register(ModuleName, 4, "membership status change not allowed")
 )

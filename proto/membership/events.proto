@@ -14,4 +14,5 @@ message EventMemberStatusChanged {
   string member_address = 1;
   MembershipStatus status = 2;
   MembershipStatus previous_status = 3;
+  string operator = 4;
 }

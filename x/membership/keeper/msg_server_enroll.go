@@ -48,7 +48,7 @@ func (k msgServer) Enroll(goCtx context.Context, msg *types.MsgEnroll) (*types.M
 		msg.Nickname,
 	)
 	// Save it to the store
-	k.SetMember(ctx, enrollee, *memberAccount)
+	k.AppendMember(ctx, enrollee, *memberAccount)
 
 	// Publish events
 	err = ctx.EventManager().EmitTypedEvents(
@@ -57,6 +57,7 @@ func (k msgServer) Enroll(goCtx context.Context, msg *types.MsgEnroll) (*types.M
 		// A member's citizenship status has changed
 		&types.EventMemberStatusChanged{
 			MemberAddress:  enrollee.String(),
+			Operator:       enrollee.String(),
 			Status:         types.MembershipStatus_MemberElectorate,
 			PreviousStatus: types.MembershipStatus_MemberStatusEmpty,
 		},

@@ -21,7 +21,7 @@ func (k Keeper) GetMember(ctx sdk.Context, address sdk.AccAddress) (member types
 	return member, true
 }
 
-func (k Keeper) SetMember(ctx sdk.Context, address sdk.AccAddress, newMember types.Member) {
+func (k Keeper) AppendMember(ctx sdk.Context, address sdk.AccAddress, newMember types.Member) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.MemberKey))
 	memberCount := k.GetMemberCount(ctx)
 	key := types.MakeMemberAddressKey(address)
@@ -57,4 +57,17 @@ func (k Keeper) SetMemberCount(ctx sdk.Context, count uint64) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.MemberCountKey))
 	bz := sdk.Uint64ToBigEndian(count)
 	store.Set([]byte(types.MemberCountKey), bz)
+}
+
+func (k Keeper) UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s types.MembershipStatus) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.MemberKey))
+	key := types.MakeMemberAddressKey(target)
+
+	// Fetch the member and update status
+	m, _ := k.GetMember(ctx, target)
+	m.Status = s
+
+	// Marshal and Set
+	memberData := k.cdc.MustMarshal(&m)
+	store.Set(key, memberData)
 }
