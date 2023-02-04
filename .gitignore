@@ -5,3 +5,6 @@ vue/src/store/generated
 .vscode/
 .DS_Store
 build
+
+# Ignore all test artifacts
+*.test

@@ -111,6 +111,9 @@ clean:
 
 rebuild: clean build
 
+test:
+	go test -v -race github.com/cdbo/brain/x/...
+
 docker-build:
 	$(DOCKER) build -f ./docker/Dockerfile.build -t brain\:$(VERSION) .; \
 	$(DOCKER) run --rm -v $(CURDIR)\:/code brain\:$(VERSION) make build;
