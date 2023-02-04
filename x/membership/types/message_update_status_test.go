@@ -15,16 +15,56 @@ func TestMsgUpdateStatus_ValidateBasic(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "invalid address",
+			name: "invalid creator address",
 			msg: MsgUpdateStatus{
 				Creator: "invalid_address",
+				Address: sample.AccAddress(),
+				Status:  MembershipStatus_MemberExpulsed,
 			},
 			err: sdkerrors.ErrInvalidAddress,
-		}, {
-			name: "valid address",
+		},
+		{
+			name: "valid creator address",
 			msg: MsgUpdateStatus{
 				Creator: sample.AccAddress(),
+				Address: sample.AccAddress(),
+				Status:  MembershipStatus_MemberExpulsed,
 			},
+		},
+		{
+			name: "invalid target address",
+			msg: MsgUpdateStatus{
+				Creator: sample.AccAddress(),
+				Address: "invalid_address",
+				Status:  MembershipStatus_MemberExpulsed,
+			},
+			err: sdkerrors.ErrInvalidAddress,
+		},
+		{
+			name: "valid creator address",
+			msg: MsgUpdateStatus{
+				Creator: sample.AccAddress(),
+				Address: sample.AccAddress(),
+				Status:  MembershipStatus_MemberExpulsed,
+			},
+		},
+		{
+			name: "invalid target status: empty",
+			msg: MsgUpdateStatus{
+				Creator: sample.AccAddress(),
+				Address: sample.AccAddress(),
+				Status:  MembershipStatus_MemberStatusEmpty,
+			},
+			err: ErrInvalidMembershipStatus,
+		},
+		{
+			name: "invalid target status: out of range",
+			msg: MsgUpdateStatus{
+				Creator: sample.AccAddress(),
+				Address: sample.AccAddress(),
+				Status:  MembershipStatus(100),
+			},
+			err: ErrInvalidMembershipStatus,
 		},
 	}
 	for _, tt := range tests {

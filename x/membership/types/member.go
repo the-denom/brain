@@ -76,6 +76,12 @@ func (m MembershipStatus) CanTransitionTo(desired MembershipStatus) bool {
 	return false
 }
 
+// IsValid returns true if the status is within range and is not zero / empty
+func (m MembershipStatus) IsValid() bool {
+	_, ok := MembershipStatus_name[int32(m)]
+	return ok && m != MembershipStatus_MemberStatusEmpty
+}
+
 func (m MembershipStatus) ToLowerCaseShortForm() string {
 	name := MembershipStatus_name[int32(m)]
 	return strings.ToLower(strings.TrimPrefix(name, MembershipStatusPrefix))

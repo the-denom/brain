@@ -52,8 +52,9 @@ func (msg *MsgUpdateStatus) ValidateBasic() error {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address (%s)", err)
 	}
 	// Status must be valid
-	if msg.Status == MembershipStatus_MemberStatusEmpty {
+	if !msg.Status.IsValid() {
 		return sdkerrors.Wrapf(ErrInvalidMembershipStatus, "status must be one of the following: %s", GetAllShortFormMembershipStatusesAsString())
 	}
+
 	return nil
 }
