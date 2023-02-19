@@ -27,6 +27,7 @@ type (
 	}
 )
 
+// Make sure Keeper implements the KeeperI interface
 var _ KeeperI = &Keeper{}
 
 func NewKeeper(
@@ -45,7 +46,6 @@ func NewKeeper(
 	}
 
 	return &Keeper{
-
 		cdc:      cdc,
 		storeKey: storeKey,
 		memKey:   memKey,

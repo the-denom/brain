@@ -33,19 +33,5 @@ func (k msgServer) UpdateStatus(goCtx context.Context, msg *types.MsgUpdateStatu
 	// Execute the status update
 	k.UpdateMemberStatus(ctx, targetAccount.GetAddress(), msg.Status)
 
-	// Publish an update event
-	err = ctx.EventManager().EmitTypedEvent(
-		// A member's citizenship status has changed
-		&types.EventMemberStatusChanged{
-			MemberAddress:  targetAccount.Address,
-			Operator:       msg.Creator,
-			Status:         types.MembershipStatus_MemberElectorate,
-			PreviousStatus: types.MembershipStatus_MemberStatusEmpty,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	return &types.MsgUpdateStatusResponse{}, nil
 }

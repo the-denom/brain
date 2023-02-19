@@ -18,6 +18,10 @@ import (
 )
 
 func NewMembershipKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
+	return NewMembershipKeeperWithAccountKeeper(t, nil)
+}
+
+func NewMembershipKeeperWithAccountKeeper(t testing.TB, ak types.AccountKeeper) (*keeper.Keeper, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 

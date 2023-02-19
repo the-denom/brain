@@ -70,4 +70,16 @@ func (k Keeper) UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s typ
 	// Marshal and Set
 	memberData := k.cdc.MustMarshal(&m)
 	store.Set(key, memberData)
+
+	// Publish an update event
+	ctx.EventManager().EmitTypedEvent(
+		// A member's citizenship status has changed
+		&types.EventMemberStatusChanged{
+			MemberAddress: target.String(),
+			// TODO: Change this
+			Operator:       "",
+			Status:         types.MembershipStatus_MemberElectorate,
+			PreviousStatus: types.MembershipStatus_MemberStatusEmpty,
+		},
+	)
 }

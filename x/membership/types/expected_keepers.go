@@ -6,6 +6,8 @@ import (
 )
 
 // AccountKeeper defines the expected account keeper used for simulations (noalias)
+//
+//go:generate mockery --name=AccountKeeper --output=mocks
 type AccountKeeper interface {
 	GetAccount(ctx sdk.Context, addr sdk.AccAddress) types.AccountI
 
@@ -15,12 +17,9 @@ type AccountKeeper interface {
 	NewAccountWithAddress(sdk.Context, sdk.AccAddress) types.AccountI
 	// Set an account in the store.
 	SetAccount(sdk.Context, types.AccountI)
-
-	// Methods imported from account should be defined here
 }
 
 // BankKeeper defines the expected interface needed to retrieve account balances.
 type BankKeeper interface {
 	SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
-	// Methods imported from bank should be defined here
 }

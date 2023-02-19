@@ -8,3 +8,4 @@ build
 
 # Ignore all test artifacts
 *.test
+mocks
