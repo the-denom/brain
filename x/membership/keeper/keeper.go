@@ -14,11 +14,17 @@ import (
 
 // KeeperI is the interface contract that x/membership's keeper implements
 type KeeperI interface {
+	// GetMember returns the member associated with the given address, and whether the member was found or not.
 	GetMember(ctx sdk.Context, address sdk.AccAddress) (member types.Member, found bool)
+	// AppendMember adds a new member to the store, associated with the given address.
 	AppendMember(ctx sdk.Context, address sdk.AccAddress, newMember types.Member)
+	// IsMember checks if a member with the given address exists in the store.
 	IsMember(ctx sdk.Context, address sdk.AccAddress) bool
+	// GetMemberCount returns the total number of members in the store.
 	GetMemberCount(ctx sdk.Context) uint64
+	// SetMemberCount sets the total number of members in the store.
 	SetMemberCount(ctx sdk.Context, count uint64)
+	// UpdateMemberStatus updates the membership status of a member associated with the given address.
 	UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s types.MembershipStatus)
 }
 
@@ -37,6 +43,7 @@ type Keeper struct {
 // Make sure Keeper implements the KeeperI interface
 var _ KeeperI = &Keeper{}
 
+// NewKeeper creates a new instance of the Keeper struct.
 func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey,
