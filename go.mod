@@ -130,6 +130,7 @@ require (
 )
 
 replace (
+	github.com/cosmos/cosmos-sdk => github.com/cdbo/cosmos-sdk v0.45.11
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/tendermint/spm => github.com/public-awesome/spm v0.1.9-stargaze.0.20221205165118-9c238a00d636
 	google.golang.org/grpc => google.golang.org/grpc v1.33.2
