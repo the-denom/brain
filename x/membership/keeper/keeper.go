@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
@@ -25,7 +26,7 @@ type KeeperI interface {
 	// SetMemberCount sets the total number of members in the store.
 	SetMemberCount(ctx sdk.Context, count uint64)
 	// UpdateMemberStatus updates the membership status of a member associated with the given address.
-	UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s types.MembershipStatus)
+	UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s types.MembershipStatus) error
 }
 
 //go:generate mockery --name=KeeperI --output=mocks
@@ -121,12 +122,24 @@ func (k Keeper) SetMemberCount(ctx sdk.Context, count uint64) {
 	store.Set([]byte(types.MemberCountKey), bz)
 }
 
-func (k Keeper) UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s types.MembershipStatus) {
+func (k Keeper) UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s types.MembershipStatus) error {
+	// Fetch the member
+	m, found := k.GetMember(ctx, target)
+
+	// Member must exist
+	if !(found) {
+		return sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "member not found: %s", target.String())
+	}
+
+	// Must be a valid status transition
+	if !m.Status.CanTransitionTo(s) {
+		return sdkerrors.Wrapf(types.ErrMembershipStatusChangeNotAllowed, "transition %s is not allowed", s.DescribeTransition(s))
+	}
+
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.MemberKey))
 	key := types.MakeMemberAddressKey(target)
 
-	// Fetch the member and update status
-	m, _ := k.GetMember(ctx, target)
+	// Update the member's status
 	m.Status = s
 
 	// Marshal and Set
@@ -144,6 +157,8 @@ func (k Keeper) UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s typ
 			PreviousStatus: types.MembershipStatus_MemberStatusEmpty,
 		},
 	)
+
+	return nil
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {

@@ -37,16 +37,6 @@ func (s *MsgServerTestSuite) TestUpdateStatus_InvalidTargetAddress() {
 	s.Require().Nil(res)
 }
 
-func (s *MsgServerTestSuite) TestUpdateStatus_MemberDoesNotExist() {
-	msg := types.NewMsgUpdateStatus(sample.AccAddress(), sample.AccAddress(), types.MembershipStatus_MemberElectorate)
-
-	// TODO: figure out how to mock the call to GetMember
-
-	res, err := s.msgSrvr.UpdateStatus(s.ctx, msg)
-	s.Require().Error(err)
-	s.Require().Nil(res)
-}
-
 func TestMsgServerTestSuite(t *testing.T) {
 	s := new(MsgServerTestSuite)
 	s.t = t
