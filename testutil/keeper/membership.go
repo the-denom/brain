@@ -46,6 +46,7 @@ func NewMembershipKeeperWithAccountKeeper(t testing.TB, ak types.AccountKeeper) 
 		memStoreKey,
 		// TODO: add a mock account keeper here
 		nil,
+		nil,
 		paramsSubspace,
 	)
 
