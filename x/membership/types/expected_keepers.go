@@ -31,6 +31,8 @@ type GovKeeper interface {
 	// IterateActiveProposalsQueue iterates over the proposals in the active proposal queue
 	// and performs a callback function
 	IterateActiveProposalsQueue(ctx sdk.Context, endTime time.Time, cb func(proposal govtypes.Proposal) (stop bool))
+	// IterateVotes iterates over the all the proposals votes and performs a callback function
+	IterateVotes(ctx sdk.Context, proposalID uint64, cb func(vote govtypes.Vote) (stop bool))
 	// DeleteDeposits deletes all the deposits on a specific proposal without refunding them
 	DeleteDeposits(ctx sdk.Context, proposalID uint64)
 	// RefundDeposits refunds and deletes all the deposits on a specific proposal

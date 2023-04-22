@@ -188,6 +188,11 @@ func (k Keeper) IterateActiveProposalsQueue(ctx sdk.Context, endTime time.Time, 
 	k.govKeeper.IterateActiveProposalsQueue(ctx, endTime, cb)
 }
 
+// IterateVotes iterates over the all the proposals votes and performs a callback function
+func (k Keeper) IterateVotes(ctx sdk.Context, proposalID uint64, cb func(vote govtypes.Vote) (stop bool)) {
+	k.govKeeper.IterateVotes(ctx, proposalID, cb)
+}
+
 // DeleteDeposits deletes all the deposits on a specific proposal without refunding them
 func (k Keeper) DeleteDeposits(ctx sdk.Context, proposalID uint64) {
 	k.govKeeper.DeleteDeposits(ctx, proposalID)
@@ -218,11 +223,6 @@ func (k Keeper) RemoveFromActiveProposalQueue(ctx sdk.Context, proposalID uint64
 // AfterProposalVotingPeriodEnded - call hook if registered
 func (k Keeper) AfterProposalVotingPeriodEnded(ctx sdk.Context, proposalID uint64) {
 	k.govKeeper.AfterProposalVotingPeriodEnded(ctx, proposalID)
-}
-
-// Tally iterates over the votes and updates the tally of a proposal based on one-member, one vote
-func (k Keeper) Tally(ctx sdk.Context, proposal govtypes.Proposal) (passes bool, burnDeposits bool, tallyResults govtypes.TallyResult) {
-	return true, false, govtypes.TallyResult{}
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
