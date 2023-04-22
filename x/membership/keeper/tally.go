@@ -5,7 +5,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	"google.golang.org/api/option"
 )
 
 type tallyStats struct {
@@ -87,7 +86,7 @@ func (k Keeper) Tally(ctx sdk.Context, proposal govtypes.Proposal) (passes bool,
 }
 
 func (k Keeper) ensureMembershipAndVotingPower(voter sdk.AccAddress) (isMember bool, isEligibleToVote bool, err error) {
-
+	return false, false, nil
 }
 
 func (k Keeper) ensureValidVoteWeighting(options govtypes.WeightedVoteOptions) error {
@@ -98,11 +97,11 @@ func (k Keeper) ensureValidVoteWeighting(options govtypes.WeightedVoteOptions) e
 			return fmt.Errorf("option %s's weight is invalid: %s", option.Option, option.Weight.String())
 		}
 		totalWeight = totalWeight.Add(option.Weight)
-	}
 
-	// Cannot have a total weight of more than 1
-	if !totalWeight.Equal(sdk.NewDec(1)) {
-		return fmt.Errorf("vote is spoilt, total weighting of %s exceeds 1", option.Weight.String())
+		// Cannot have a total weight of more than 1
+		if !totalWeight.Equal(sdk.NewDec(1)) {
+			return fmt.Errorf("vote is spoilt, total weighting of %s exceeds 1", option.Weight.String())
+		}
 	}
 
 	return nil
@@ -118,5 +117,5 @@ func (k Keeper) getVoterChoice(options govtypes.WeightedVoteOptions) govtypes.Vo
 }
 
 func (k Keeper) getMemberVotingPower(ctx sdk.Context, address sdk.AccAddress) sdk.Dec {
-
+	return sdk.NewDec(0)
 }
