@@ -115,9 +115,9 @@ import (
 
 	// unnamed import of statik for swagger UI support
 	_ "github.com/cdbo/brain/statik"
-	membershipmodule "github.com/cdbo/brain/x/membership"
-	membershipmodulekeeper "github.com/cdbo/brain/x/membership/keeper"
-	membershipmoduletypes "github.com/cdbo/brain/x/membership/types"
+	"github.com/cdbo/brain/x/membership"
+	membershipkeeper "github.com/cdbo/brain/x/membership/keeper"
+	membershiptypes "github.com/cdbo/brain/x/membership/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
@@ -211,7 +211,7 @@ var (
 		wasm.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		intertx.AppModuleBasic{},
-		membershipmodule.AppModuleBasic{},
+		membership.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -278,7 +278,7 @@ type WasmApp struct {
 	scopedTransferKeeper      capabilitykeeper.ScopedKeeper
 	scopedWasmKeeper          capabilitykeeper.ScopedKeeper
 
-	MembershipKeeper membershipmodulekeeper.Keeper
+	MembershipKeeper membershipkeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// the module manager
@@ -328,7 +328,7 @@ func NewWasmApp(
 		paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, wasm.StoreKey, icahosttypes.StoreKey, icacontrollertypes.StoreKey, intertxtypes.StoreKey,
-		membershipmoduletypes.StoreKey,
+		membershiptypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -583,14 +583,15 @@ func NewWasmApp(
 		govRouter,
 	)
 
-	app.MembershipKeeper = *membershipmodulekeeper.NewKeeper(
+	app.MembershipKeeper = *membershipkeeper.NewKeeper(
 		appCodec,
-		keys[membershipmoduletypes.StoreKey],
-		keys[membershipmoduletypes.MemStoreKey],
+		keys[membershiptypes.StoreKey],
+		keys[membershiptypes.MemStoreKey],
 		app.accountKeeper,
-		app.getSubspace(membershipmoduletypes.ModuleName),
+		app.govKeeper,
+		app.getSubspace(membershiptypes.ModuleName),
 	)
-	membershipModule := membershipmodule.NewAppModule(
+	membershipModule := membership.NewAppModule(
 		appCodec,
 		app.MembershipKeeper,
 	)
@@ -663,12 +664,13 @@ func NewWasmApp(
 		icatypes.ModuleName,
 		intertxtypes.ModuleName,
 		wasm.ModuleName,
-		membershipmoduletypes.ModuleName,
+		membershiptypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
+		membershiptypes.ModuleName, // must come before gov's EndBlock
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
 		capabilitytypes.ModuleName,
@@ -690,7 +692,6 @@ func NewWasmApp(
 		icatypes.ModuleName,
 		intertxtypes.ModuleName,
 		wasm.ModuleName,
-		membershipmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -725,7 +726,7 @@ func NewWasmApp(
 		intertxtypes.ModuleName,
 		// wasm after ibc transfer
 		wasm.ModuleName,
-		membershipmoduletypes.ModuleName,
+		membershiptypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -972,7 +973,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(wasm.ModuleName)
-	paramsKeeper.Subspace(membershipmoduletypes.ModuleName)
+	paramsKeeper.Subspace(membershiptypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

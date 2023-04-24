@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
@@ -27,6 +29,22 @@ type KeeperI interface {
 	SetMemberCount(ctx sdk.Context, count uint64)
 	// UpdateMemberStatus updates the membership status of a member associated with the given address.
 	UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s types.MembershipStatus) error
+	// IterateActiveProposalsQueue cycle through proposals that have ended their voting period
+	IterateActiveProposalsQueue(ctx sdk.Context, endTime time.Time, cb func(proposal govtypes.Proposal) (stop bool))
+	// DeleteDeposits deletes all the deposits on a specific proposal without refunding them
+	DeleteDeposits(ctx sdk.Context, proposalID uint64)
+	// RefundDeposits refunds and deletes all the deposits on a specific proposal
+	RefundDeposits(ctx sdk.Context, proposalID uint64)
+	// ExecuteProposalHandler executes the proposal's completion handler
+	ExecuteProposalHandler(cacheCtx sdk.Context, proposalRoute string, content govtypes.Content) error
+	// SetProposal writes the updated proposal to the store
+	SetProposal(ctx sdk.Context, proposal govtypes.Proposal)
+	// RemoveFromActiveProposalQueue removes a proposalID from the Active Proposal Queue
+	RemoveFromActiveProposalQueue(ctx sdk.Context, proposalID uint64, endTime time.Time)
+	// AfterProposalVotingPeriodEnded - call hook if registered
+	AfterProposalVotingPeriodEnded(ctx sdk.Context, proposalID uint64)
+	// Tally iterates over the votes and updates the tally of a proposal based on one-member, one vote
+	Tally(ctx sdk.Context, proposal govtypes.Proposal) (passes bool, burnDeposits bool, tallyResults govtypes.TallyResult)
 }
 
 //go:generate mockery --name=KeeperI --output=mocks
@@ -37,6 +55,7 @@ type Keeper struct {
 	memKey   sdk.StoreKey
 
 	accountKeeper types.AccountKeeper
+	govKeeper     types.GovKeeper
 
 	paramstore paramtypes.Subspace
 }
@@ -51,6 +70,7 @@ func NewKeeper(
 	memKey sdk.StoreKey,
 
 	accountKeeper types.AccountKeeper,
+	govKeeper types.GovKeeper,
 
 	ps paramtypes.Subspace,
 
@@ -66,6 +86,7 @@ func NewKeeper(
 		memKey:   memKey,
 
 		accountKeeper: accountKeeper,
+		govKeeper:     govKeeper,
 
 		paramstore: ps,
 	}
@@ -159,6 +180,49 @@ func (k Keeper) UpdateMemberStatus(ctx sdk.Context, target sdk.AccAddress, s typ
 	)
 
 	return nil
+}
+
+// IterateActiveProposalsQueue cycle through proposals that have ended their voting period
+func (k Keeper) IterateActiveProposalsQueue(ctx sdk.Context, endTime time.Time, cb func(proposal govtypes.Proposal) (stop bool)) {
+	// Pass-through to Gov keeper
+	k.govKeeper.IterateActiveProposalsQueue(ctx, endTime, cb)
+}
+
+// IterateVotes iterates over the all the proposals votes and performs a callback function
+func (k Keeper) IterateVotes(ctx sdk.Context, proposalID uint64, cb func(vote govtypes.Vote) (stop bool)) {
+	k.govKeeper.IterateVotes(ctx, proposalID, cb)
+}
+
+// DeleteDeposits deletes all the deposits on a specific proposal without refunding them
+func (k Keeper) DeleteDeposits(ctx sdk.Context, proposalID uint64) {
+	k.govKeeper.DeleteDeposits(ctx, proposalID)
+}
+
+// RefundDeposits refunds and deletes all the deposits on a specific proposal
+func (k Keeper) RefundDeposits(ctx sdk.Context, proposalID uint64) {
+	k.govKeeper.RefundDeposits(ctx, proposalID)
+}
+
+// ExecuteProposalHandler executes the proposal's completion handler
+func (k Keeper) ExecuteProposalHandler(cacheCtx sdk.Context, proposalRoute string, content govtypes.Content) error {
+	handler := k.govKeeper.Router().GetRoute(proposalRoute)
+	err := handler(cacheCtx, content)
+	return err
+}
+
+// SetProposal writes the updated proposal to the store
+func (k Keeper) SetProposal(ctx sdk.Context, proposal govtypes.Proposal) {
+	k.govKeeper.SetProposal(ctx, proposal)
+}
+
+// RemoveFromActiveProposalQueue removes a proposalID from the Active Proposal Queue
+func (k Keeper) RemoveFromActiveProposalQueue(ctx sdk.Context, proposalID uint64, endTime time.Time) {
+	k.govKeeper.RemoveFromActiveProposalQueue(ctx, proposalID, endTime)
+}
+
+// AfterProposalVotingPeriodEnded - call hook if registered
+func (k Keeper) AfterProposalVotingPeriodEnded(ctx sdk.Context, proposalID uint64) {
+	k.govKeeper.AfterProposalVotingPeriodEnded(ctx, proposalID)
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {

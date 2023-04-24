@@ -100,6 +100,10 @@ endif
 install: go.sum 
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/braind
 
+generate:
+	(which mockery || go install github.com/vektra/mockery/v2@latest)
+	go generate ./...
+
 build:
 	go build $(BUILD_FLAGS) -o ./build/braind ./cmd/braind
 
