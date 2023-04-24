@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	"github.com/cdbo/brain/x/membership/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 )
@@ -43,11 +44,7 @@ func (k Keeper) Tally(ctx sdk.Context, proposal govtypes.Proposal) (passes bool,
 
 		// Validate this voter
 		voterAddress := sdk.MustAccAddressFromBech32(vote.Voter)
-		isMember, isEligibleToVote, err := k.ensureMembershipAndVotingPower(voterAddress)
-		if err != nil {
-			cl.Error("could not fetch member details: %s", err)
-			return false
-		}
+		isMember, isEligibleToVote := k.ensureMembershipAndEligibility(ctx, voterAddress)
 
 		// The vote is ignored if the voter is not a member of the electorate
 		if !isMember {
@@ -65,7 +62,7 @@ func (k Keeper) Tally(ctx sdk.Context, proposal govtypes.Proposal) (passes bool,
 
 		// The vote is ignored if the weighting is not 1 for a single option
 		// (democratic voting does not support split votes)
-		err = k.ensureValidVoteWeighting(vote.Options)
+		err := k.ensureValidVoteWeighting(vote.Options)
 		if err != nil {
 			cl.Error("vote has invalid weightings: %s, ignored", err)
 			return false
@@ -85,8 +82,19 @@ func (k Keeper) Tally(ctx sdk.Context, proposal govtypes.Proposal) (passes bool,
 	return true, false, govtypes.TallyResult{}
 }
 
-func (k Keeper) ensureMembershipAndVotingPower(voter sdk.AccAddress) (isMember bool, isEligibleToVote bool, err error) {
-	return false, false, nil
+func (k Keeper) ensureMembershipAndEligibility(ctx sdk.Context, voter sdk.AccAddress) (isMember bool, isEligibleToVote bool) {
+	// Must be a member of the denom
+	m, found := k.GetMember(ctx, voter)
+	if !found {
+		return false, false
+	}
+
+	// Must be an electorate member
+	if m.Status != types.MembershipStatus_MemberElectorate {
+		return true, false
+	}
+
+	return true, true
 }
 
 func (k Keeper) ensureValidVoteWeighting(options govtypes.WeightedVoteOptions) error {
